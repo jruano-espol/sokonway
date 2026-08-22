@@ -1,4 +1,5 @@
-#include "level.h"
+#include "level.hpp"
+#include "atlas.hpp"
 
 #include <sstream>
 #include <string>
@@ -17,7 +18,40 @@ static std::vector<std::string> split_lines(const char *text)
     return lines;
 }
 
-void Level_Grid::load(const char *identifier)
+
+Level::~Level() {
+    if (data) {
+        delete[] data;
+        data = nullptr;
+    }
+    if (initial_data) {
+        delete[] initial_data;
+        initial_data = nullptr;
+    }
+}
+
+Tile_Kind Level::at(int row, int col)
+{
+    assert(in_bounds(row, col));
+    uint8_t value = data[row * width + col];
+    return Tile_Kind{value};
+}
+
+void Level::set(int row, int col, Tile_Kind kind)
+{
+    assert(in_bounds(row, col));
+    switch (kind) {
+    case Tile_Kind::Player: {
+        initial_player_position = Grid_Point{row, col};
+    } break;
+    default: {
+        uint8_t value = (uint8_t)kind;
+        data[row * width + col] = value;
+    } break;
+    }
+}
+
+void Level::load(const char *identifier)
 {
     char *text = LoadFileText(TextFormat("assets/levels/%s.txt", identifier));
     std::vector<std::string> lines = split_lines(text);
@@ -28,6 +62,7 @@ void Level_Grid::load(const char *identifier)
     this->height = lines.size();
     assert(width > 0 && height > 0);
     this->data = new uint8_t[width * height];
+    this->initial_data = new uint8_t[width * height];
 
     for (size_t line_index = 0; line_index < lines.size(); line_index++) {
         assert(lines[line_index].size() == width);
@@ -35,12 +70,13 @@ void Level_Grid::load(const char *identifier)
             uint8_t number = lines[line_index][char_index] - '0';
             int row = line_index;
             int col = char_index;
+            initial_data[row * width + col] = number;
             this->set(row, col, Tile_Kind{number});
         }
     }
 }
 
-void Level_Grid::draw()
+void Level::draw()
 {
     assert(data);
     for (int row = 0; row < height; row++) {

@@ -1,6 +1,6 @@
 #include <raylib.h>
-#include "common.h"
-#include "pico8.h"
+#include "common.hpp"
+#include "pico8.hpp"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -8,12 +8,31 @@
 
 Game_State game = {};
 
+static void draw_grid()
+{
+    const Color color = {255, 255, 255, 20};
+
+    const int tile_h = GetScreenHeight() / LEVEL_TILE_ROWS;
+    for (int row = 0; row < LEVEL_TILE_ROWS; row++) {
+        int y = row * tile_h;
+        DrawLine(0, y, GetScreenWidth(), y, color);
+    }
+    const int tile_w = GetScreenWidth() / LEVEL_TILE_COLS;
+    for (int col = 0; col < LEVEL_TILE_COLS; col++) {
+        int x = col * tile_w;
+        DrawLine(x, 0, x, GetScreenHeight(), color);
+    }
+}
+
 void game_init()
 {
     game.textureAtlas = LoadTexture("assets/images/sokonway-texture-atlas.png");
     game.renderTexture = LoadRenderTexture(SCREEN_W, SCREEN_H);
 
     game.levels[0].load("0");
+    game.current_level = 0;
+
+    game.player.grid_position = game.levels[game.current_level].initial_player_position;
 }
 
 void game_cleanup()
@@ -24,9 +43,12 @@ void game_cleanup()
 
 void game_update()
 {
+    game.player.update();
+
     BeginTextureMode(game.renderTexture);
         ClearBackground(PICO8_DARKGREY);
         game.levels[0].draw();
+        game.player.draw();
     EndTextureMode();
 
     BeginDrawing();
@@ -34,6 +56,7 @@ void game_update()
         Rectangle screen_source = {0, 0, (float)SCREEN_W, -(float)SCREEN_H};
         Rectangle screen_dest = {0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()};
         DrawTexturePro(game.renderTexture.texture, screen_source, screen_dest, {0, 0}, 0, WHITE);
+        draw_grid();
     EndDrawing();
 }
 

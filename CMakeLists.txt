@@ -27,9 +27,11 @@ if (NOT raylib_FOUND)
 endif()
 
 set(SOURCES
+    "src/animation.cpp"
     "src/atlas.cpp"
     "src/level.cpp"
     "src/main.cpp"
+    "src/player.cpp"
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

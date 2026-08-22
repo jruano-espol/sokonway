@@ -14,7 +14,7 @@ The output binary is in the `build` folder.
 
 ### Web
 
-The [emscripten](https://emscripten.org/) sdk is requireed.
+The [emscripten](https://emscripten.org/) sdk is required.
 
 ```bash
 source deploy_web.sh

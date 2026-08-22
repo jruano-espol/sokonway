@@ -1,20 +1,6 @@
-#include "atlas.h"
-#include "common.h"
+#include "atlas.hpp"
+#include "common.hpp"
 #include <cassert>
-
-int tile_index_from(Tile_Kind kind)
-{
-    switch (kind) {
-    case Tile_Kind::Air: return -1;
-    case Tile_Kind::Player: return 0;
-    case Tile_Kind::Cell: return 2;
-    case Tile_Kind::Wall: return 3;
-    case Tile_Kind::Button: return 6;
-    case Tile_Kind::Portal: return 8;
-    case Tile_Kind::Door: return 12;
-    }
-    return -1;
-}
 
 bool Grid_Point::in_atlas_bounds()
 {
@@ -49,5 +35,5 @@ void draw_tile(Tile_Kind kind, int row, int col)
 {
     float x = col * TILE_W;
     float y = row * TILE_H;
-    draw_sprite(tile_index_from(kind), x, y);
+    draw_sprite(atlas_index_from(kind), x, y);
 }

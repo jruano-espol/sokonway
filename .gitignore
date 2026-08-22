@@ -1,3 +1,4 @@
 .cache/
 build/
 web_build/
+compile_commands.json
