@@ -24,6 +24,6 @@ struct Animation {
 
     void play();
     void update();
-    void draw(int x, int y) const;
-    void draw_tiled(Grid_Point point) const;
+    void draw(float x, float y, float alpha = 1.0f) const;
+    void draw_tiled(Grid_Point point, float alpha = 1.0f) const;
 };

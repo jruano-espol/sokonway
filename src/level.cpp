@@ -50,27 +50,16 @@ const Animation &PropAnimated<kind>::get_animation()
 }
 
 template <Tile_Kind kind>
-void PropAnimated<kind>::draw()
+void PropAnimated<kind>::draw(float alpha)
 {
     const Animation &animation = get_animation();
-    animation.draw_tiled(point);
-}
-
-Level::~Level() {
-    if (data) {
-        delete[] data;
-        data = nullptr;
-    }
-    if (initial_data) {
-        delete[] initial_data;
-        initial_data = nullptr;
-    }
+    animation.draw_tiled(point, alpha);
 }
 
 Tile_Kind Level::at(int row, int col) const
 {
     assert(in_bounds(row, col));
-    uint8_t value = data[row * width + col];
+    uint8_t value = tiles[row * width + col];
     return Tile_Kind{value};
 }
 
@@ -83,7 +72,7 @@ void Level::set(Grid_Point point, Tile_Kind kind)
 {
     assert(in_bounds(point));
     const uint8_t value = (uint8_t)kind;
-    data[point.row * width + point.col] = value;
+    tiles[point.row * width + point.col] = value;
 }
 
 void Level::set_initial(Grid_Point point, Tile_Kind kind)
@@ -143,8 +132,11 @@ void Level::load(const char *level_name)
     this->width = lines[0].size();
     this->height = lines.size();
     assert(width > 0 && height > 0);
-    this->data = new uint8_t[width * height];
-    this->initial_data = new uint8_t[width * height];
+
+    this->allocator.init(3 * width * height);
+    this->initial_data = (uint8_t*)allocator.push(width * height);
+    this->tiles = (uint8_t*)allocator.push(width * height);
+    this->cells = (uint8_t*)allocator.push(width * height);
 
     for (size_t line_index = 0; line_index < lines.size(); line_index++) {
         assert(lines[line_index].size() == width);
@@ -164,11 +156,11 @@ void Level::load(const char *level_name)
 
 void Level::draw()
 {
-    assert(data);
+    assert(tiles);
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             Tile_Kind kind = at(row, col);
-            draw_tile(kind, row, col, true);
+            draw_tile(kind, row, col, 1.0f, true);
         }
     }
     for (size_t i = 0; i < buttons.count; i++) {
@@ -179,7 +171,7 @@ void Level::draw()
         draw_sprite(atlas_index, buttons[i].point);
     }
     for (size_t i = 0; i < doors.count; i++) {
-        doors[i].draw();
+        doors[i].draw(0.9f);
     }
     portal.draw();
 }

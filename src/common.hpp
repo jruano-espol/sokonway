@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <raylib.h>
 #include <cstddef>
 #include <cassert>
@@ -57,6 +58,35 @@ struct Fixed_Array {
                 break;
             }
         }
+    }
+};
+
+struct Bump_Allocator_Fixed {
+    uint8_t *data = nullptr;
+    size_t count = 0;
+    size_t capacity = 0;
+
+    ~Bump_Allocator_Fixed()
+    {
+        if (data) {
+            delete[] data;
+        }
+    }
+
+    void init(size_t size_in_bytes)
+    {
+        assert(data == nullptr);
+        data = new uint8_t[size_in_bytes];
+        capacity = size_in_bytes;
+        count = 0;
+    }
+
+    void *push(size_t size_in_bytes)
+    {
+        void *ptr = &data[count];
+        count += size_in_bytes;
+        assert(count <= capacity);
+        return ptr;
     }
 };
 

@@ -1,6 +1,7 @@
 #include "atlas.hpp"
 #include "common.hpp"
 #include "game_state.hpp"
+#include "raylib.h"
 #include <cassert>
 
 bool Grid_Point::in_atlas_bounds()
@@ -22,24 +23,25 @@ Grid_Point Grid_Point::from(int atlas_index)
     return result;
 }
 
-void draw_sprite(int atlas_index, float x, float y)
+void draw_sprite(int atlas_index, float x, float y, float alpha)
 {
     if (atlas_index >= 0) {
         Grid_Point point = Grid_Point::from(atlas_index);
         Rectangle source = {(float)(point.col * TILE_W), (float)(point.row * TILE_H), TILE_W, TILE_H};
         Rectangle dest = {x, y, TILE_W, TILE_H};
-        DrawTexturePro(game.textureAtlas, source, dest, {0, 0}, 0, WHITE);
+        Color tint = ColorAlpha(WHITE, alpha);
+        DrawTexturePro(game.textureAtlas, source, dest, {0, 0}, 0, tint);
     }
 }
 
-void draw_sprite(int atlas_index, Grid_Point point)
+void draw_sprite(int atlas_index, Grid_Point point, float alpha)
 {
     float x = point.col * TILE_W;
     float y = point.row * TILE_H;
-    draw_sprite(atlas_index, x, y);
+    draw_sprite(atlas_index, x, y, alpha);
 }
 
-void draw_tile(Tile_Kind kind, int row, int col, bool hide_interactables)
+void draw_tile(Tile_Kind kind, int row, int col, float alpha, bool hide_interactables)
 {
     if (hide_interactables) {
         switch (kind) {
@@ -53,5 +55,5 @@ void draw_tile(Tile_Kind kind, int row, int col, bool hide_interactables)
     }
     float x = col * TILE_W;
     float y = row * TILE_H;
-    draw_sprite(atlas_index_from(kind), x, y);
+    draw_sprite(atlas_index_from(kind), x, y, alpha);
 }

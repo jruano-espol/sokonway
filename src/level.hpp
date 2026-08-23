@@ -14,7 +14,7 @@ struct PropAnimated {
     }
 
     const Animation &get_animation();
-    void draw();
+    void draw(float alpha = 1.0f);
 };
 
 struct Button {
@@ -29,18 +29,19 @@ enum class Level_Flag : uint8_t {
 };
 
 struct Level {
+    Fixed_Array<Button, 8> buttons = {};
+    Fixed_Array<PropAnimated<Tile_Kind::Door>, 8> doors = {};
+    Bump_Allocator_Fixed allocator = {};
+    Grid_Point initial_player_position = {};
+    PropAnimated<Tile_Kind::Portal> portal = {};
+
+    uint8_t *initial_data = nullptr;
+    uint8_t *tiles = nullptr;
+    uint8_t *cells = nullptr;
     int id = 0;
     int width = 0;
     int height = 0;
-    uint8_t *data = nullptr;
-    uint8_t *initial_data = nullptr;
-    Grid_Point initial_player_position = {};
-    Fixed_Array<Button, 8> buttons = {};
-    Fixed_Array<PropAnimated<Tile_Kind::Door>, 8> doors = {};
-    PropAnimated<Tile_Kind::Portal> portal = {};
     uint8_t flags = 0;
-
-    ~Level();
 
     constexpr bool in_bounds(int row, int col) const
     {

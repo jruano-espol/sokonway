@@ -10,25 +10,19 @@
 
 Game_State game = {};
 
-static void draw_grid(float game_scale)
+static void draw_grid(float game_scale, Vector2 offset, float game_screen_w, float game_screen_h)
 {
     const Color color = {255, 255, 255, 20};
 
-    const float window_w = GetScreenWidth();
-    const float window_h = GetScreenHeight();
-
-    const float offset_x = (window_w - SCREEN_W * game_scale) * 0.5f;
-    const float offset_y = (window_h - SCREEN_H * game_scale) * 0.5f;
-
-    const float tile_h = (SCREEN_H * game_scale) / LEVEL_TILE_ROWS;
+    const float tile_h = game_screen_h / LEVEL_TILE_ROWS;
     for (int row = 0; row < LEVEL_TILE_ROWS; row++) {
-        const float y = offset_y + row * tile_h;
-        DrawLineV({offset_x, y}, {offset_x + SCREEN_W * game_scale, y}, color);
+        const float y = offset.y + row * tile_h;
+        DrawLineV({offset.x, y}, {offset.x + game_screen_w, y}, color);
     }
-    const float tile_w = (SCREEN_W * game_scale) / LEVEL_TILE_COLS;
+    const float tile_w = game_screen_w / LEVEL_TILE_COLS;
     for (int col = 0; col < LEVEL_TILE_COLS; col++) {
-        const float x = offset_x + col * tile_w;
-        DrawLineV({x, offset_y}, {x, offset_y + SCREEN_H * game_scale}, color);
+        const float x = offset.x + col * tile_w;
+        DrawLineV({x, offset.y}, {x, offset.y + game_screen_h}, color);
     }
 }
 
@@ -68,17 +62,19 @@ void game_update()
     EndTextureMode();
 
     const float game_scale = std::min((float)GetScreenWidth()/SCREEN_W, (float)GetScreenHeight()/SCREEN_H);
+    const float game_screen_w = SCREEN_W * game_scale;
+    const float game_screen_h = SCREEN_H * game_scale;
+    const Vector2 game_offset = {
+        (GetScreenWidth() - game_screen_w) * 0.5f,
+        (GetScreenHeight() - game_screen_h) * 0.5f,
+    };
+
     BeginDrawing();
         ClearBackground(BLACK);
         Rectangle screen_source = {0, 0, (float)SCREEN_W, -(float)SCREEN_H};
-        Rectangle screen_dest = {
-            (GetScreenWidth() - SCREEN_W * game_scale) * 0.5f,
-            (GetScreenHeight() - SCREEN_H * game_scale) * 0.5f,
-            SCREEN_W * game_scale,
-            SCREEN_H * game_scale,
-        };
+        Rectangle screen_dest = {game_offset.x, game_offset.y, game_screen_w, game_screen_h};
         DrawTexturePro(game.renderTexture.texture, screen_source, screen_dest, {0, 0}, 0, WHITE);
-        draw_grid(game_scale);
+        draw_grid(game_scale, game_offset, game_screen_w, game_screen_h);
     EndDrawing();
 }
 
