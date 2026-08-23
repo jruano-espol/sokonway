@@ -30,6 +30,7 @@ static Grid_Point get_corresponding_door_point(int level_id, Grid_Point point)
         break;
     }
     assert(!"unreachable");
+    return {};
 }
 
 template <Tile_Kind kind>
@@ -68,11 +69,25 @@ Tile_Kind Level::at(Grid_Point point) const
     return at(point.row, point.col);
 }
 
+bool Level::has_cell_at(Grid_Point point) const
+{
+    assert(in_bounds(point));
+    uint8_t value = cells[point.row * width + point.col];
+    return Tile_Kind{value} == Tile_Kind::Cell;
+}
+
 void Level::set(Grid_Point point, Tile_Kind kind)
 {
     assert(in_bounds(point));
     const uint8_t value = (uint8_t)kind;
     tiles[point.row * width + point.col] = value;
+}
+
+void Level::set_cell(Grid_Point point, bool fill)
+{
+    assert(in_bounds(point));
+    Tile_Kind kind = fill ? Tile_Kind::Cell : Tile_Kind::Air;
+    cells[point.row * width + point.col] = (uint8_t)kind;
 }
 
 void Level::set_initial(Grid_Point point, Tile_Kind kind)
@@ -98,6 +113,9 @@ void Level::set_initial(Grid_Point point, Tile_Kind kind)
         assert(!has_flag(Level_Flag::Has_Portal));
         flags |= (uint8_t)Level_Flag::Has_Portal;
         portal.point = point;
+        break;
+    case Tile_Kind::Cell:
+        set_cell(point, true);
         break;
     default:
         set(point, kind);
@@ -154,6 +172,25 @@ void Level::load(const char *level_name)
     assert(has_flag(Level_Flag::Has_Portal));
 }
 
+
+void Level::reload()
+{
+    memset(tiles, 0, width * height);
+    memset(cells, 0, width * height);
+    flags = 0;
+
+    buttons.clear();
+    doors.clear();
+    portal = {};
+
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            const uint8_t number = initial_data[row * width + col];
+            this->set_initial({row, col}, Tile_Kind{number});
+        }
+    }
+}
+
 void Level::draw()
 {
     assert(tiles);
@@ -172,6 +209,14 @@ void Level::draw()
     }
     for (size_t i = 0; i < doors.count; i++) {
         doors[i].draw(0.9f);
+    }
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            Grid_Point point = {row, col};
+            if (has_cell_at(point)) {
+                draw_sprite(atlas_index_from(Tile_Kind::Cell), point, 0.9f);
+            }
+        }
     }
     portal.draw();
 }

@@ -1,6 +1,7 @@
 #include "player.hpp"
 #include "common.hpp"
 #include "game_state.hpp"
+#include "raylib.h"
 
 #define is_left_pressed() (IsKeyPressedOrRepeat(KEY_A) || IsKeyPressedOrRepeat(KEY_LEFT))
 #define is_right_pressed() (IsKeyPressedOrRepeat(KEY_D) || IsKeyPressedOrRepeat(KEY_RIGHT))
@@ -9,21 +10,27 @@
 
 void Player::update()
 {
-    Grid_Point direction = {0, 0};
-    if (is_left_pressed()) {
-        direction = {0, -1};
-    }
-    if (is_right_pressed()) {
-        direction = {0, 1};
-    }
-    if (is_up_pressed()) {
-        direction = {-1, 0};
-    }
-    if (is_down_pressed()) {
-        direction = {1, 0};
+    Level &level = game.levels[game.current_level];
+
+    if (IsKeyPressed(KEY_R)) {
+        level.reload();
+        grid_position = level.initial_player_position;
+        return;
     }
 
-    Level &level = game.levels[game.current_level];
+    Grid_Point direction = {0, 0};
+    if (is_left_pressed()) {
+        direction.col -= 1;
+    }
+    if (is_right_pressed()) {
+        direction.col += 1;
+    }
+    if (is_up_pressed()) {
+        direction.row -= 1;
+    }
+    if (is_down_pressed()) {
+        direction.row += 1;
+    }
 
     if (direction != Grid_Point{0, 0}) {
         const Grid_Point new_position = grid_position + direction;
@@ -38,6 +45,16 @@ void Player::update()
             if (p_button && !p_button->pressed) {
                 p_button->pressed = true;
                 level.remove_door_at(p_button->corresponding_door_point);
+            }
+        }
+
+        if (level.has_cell_at(new_position)) {
+            const Grid_Point after_target = new_position + direction;
+            if (level.has_cell_at(after_target)) {
+                can_move_there = false;
+            } else {
+                level.set_cell(new_position, false);
+                level.set_cell(after_target, true);
             }
         }
 

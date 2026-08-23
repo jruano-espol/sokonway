@@ -9,6 +9,7 @@
 #endif
 
 Game_State game = {};
+int g_key_repeat_timer = 0;
 
 static void draw_grid(float game_scale, Vector2 offset, float game_screen_w, float game_screen_h)
 {
@@ -49,6 +50,8 @@ void game_cleanup()
 
 void game_update()
 {
+    g_key_repeat_timer++;
+
     game.animation_player.update();
     game.animation_portal.update();
     game.animation_door.update();
@@ -81,15 +84,17 @@ void game_update()
 int main()
 {
     constexpr int initial_scale = 2;
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(SCREEN_W * initial_scale, SCREEN_H * initial_scale, "Sokonway");
+
+    SetExitKey(KEY_NULL);
+    SetTargetFPS(60);
+
     game_init();
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(game_update, 0, 1);
 #else
-    SetExitKey(KEY_NULL);
-    SetTargetFPS(60);
-
     while (!WindowShouldClose()) {
         game_update();
     }

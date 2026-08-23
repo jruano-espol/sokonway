@@ -1,9 +1,10 @@
 #pragma once
 
-#include <cstdint>
-#include <raylib.h>
-#include <cstddef>
 #include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <raylib.h>
 
 #define TILE_W 8
 #define TILE_H 8
@@ -17,7 +18,10 @@ static_assert(LEVEL_TILE_ROWS > 0);
 #define SCREEN_W (TILE_W * LEVEL_TILE_COLS)
 #define SCREEN_H (TILE_H * LEVEL_TILE_ROWS)
 
-#define IsKeyPressedOrRepeat(key) (IsKeyPressed(key) || IsKeyPressedRepeat(key))
+extern int g_key_repeat_timer;
+#define IsKeyPressedOrRepeat(key)\
+    (IsKeyPressed(key) ? (g_key_repeat_timer = 1) : 0,\
+     IsKeyPressed(key) || (IsKeyDown(key) && g_key_repeat_timer % 10 == 0))
 
 #define PICO8_BLACK Color{0, 0, 0, 255}
 #define PICO8_DARKBLUE Color{29, 43, 83, 255}
@@ -50,7 +54,7 @@ struct Fixed_Array {
         data[count++] = element;
     }
 
-    void unordered_remove(const T &element)
+    constexpr void unordered_remove(const T &element)
     {
         for (size_t i = 0; i < count; i++) {
             if (data[i] == element) {
@@ -58,6 +62,11 @@ struct Fixed_Array {
                 break;
             }
         }
+    }
+
+    constexpr void clear()
+    {
+        count = 0;
     }
 };
 
@@ -77,6 +86,7 @@ struct Bump_Allocator_Fixed {
     {
         assert(data == nullptr);
         data = new uint8_t[size_in_bytes];
+        memset(data, 0, size_in_bytes);
         capacity = size_in_bytes;
         count = 0;
     }

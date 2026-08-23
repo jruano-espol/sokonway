@@ -60,11 +60,14 @@ struct Level {
 
     Tile_Kind at(int row, int col) const;
     Tile_Kind at(Grid_Point point) const;
+    bool has_cell_at(Grid_Point point) const;
     void set(Grid_Point point, Tile_Kind kind);
+    void set_cell(Grid_Point point, bool fill);
     void set_initial(Grid_Point point, Tile_Kind kind);
     Button *find_button(Grid_Point point);
     void remove_door_at(Grid_Point point);
 
     void load(const char *level_name);
+    void reload();
     void draw();
 };
