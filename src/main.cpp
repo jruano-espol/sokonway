@@ -1,6 +1,7 @@
 #include <raylib.h>
+#include "animation.hpp"
 #include "common.hpp"
-#include "pico8.hpp"
+#include "game_state.hpp"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
@@ -32,6 +33,10 @@ void game_init()
     game.levels[0].load("0");
     game.current_level = 0;
 
+    game.animation_player = Animation::from(Tile_Kind::Player, true, 20);
+    game.animation_portal = Animation::from(Tile_Kind::Portal, true, 15);
+    game.animation_door = Animation::from(Tile_Kind::Door, true, 10);
+
     game.player.grid_position = game.levels[game.current_level].initial_player_position;
 }
 
@@ -43,6 +48,10 @@ void game_cleanup()
 
 void game_update()
 {
+    game.animation_player.update();
+    game.animation_portal.update();
+    game.animation_door.update();
+
     game.player.update();
 
     BeginTextureMode(game.renderTexture);

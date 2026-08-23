@@ -1,4 +1,5 @@
 #include "animation.hpp"
+#include "common.hpp"
 
 void Animation::play()
 {
@@ -19,9 +20,14 @@ void Animation::update()
     counter++;
 }
 
-void Animation::draw(int x, int y)
+void Animation::draw(int x, int y) const
 {
     const int frame = get_frame();
     const int atlas_index = frame + atlas_index_first;
     draw_sprite(atlas_index, x, y);
+}
+
+void Animation::draw_tiled(Grid_Point point) const
+{
+    draw(point.col * TILE_W, point.row * TILE_H);
 }

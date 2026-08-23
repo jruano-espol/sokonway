@@ -1,5 +1,6 @@
 #include "atlas.hpp"
 #include "common.hpp"
+#include "game_state.hpp"
 #include <cassert>
 
 bool Grid_Point::in_atlas_bounds()
@@ -31,8 +32,25 @@ void draw_sprite(int atlas_index, float x, float y)
     }
 }
 
-void draw_tile(Tile_Kind kind, int row, int col)
+void draw_sprite(int atlas_index, Grid_Point point)
 {
+    float x = point.col * TILE_W;
+    float y = point.row * TILE_H;
+    draw_sprite(atlas_index, x, y);
+}
+
+void draw_tile(Tile_Kind kind, int row, int col, bool hide_interactables)
+{
+    if (hide_interactables) {
+        switch (kind) {
+        case Tile_Kind::Door:
+        case Tile_Kind::Portal:
+        case Tile_Kind::Button:
+            return;
+        default:
+            break;
+        }
+    }
     float x = col * TILE_W;
     float y = row * TILE_H;
     draw_sprite(atlas_index_from(kind), x, y);

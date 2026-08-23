@@ -1,30 +1,69 @@
 #pragma once
 
+#include "animation.hpp"
 #include "atlas.hpp"
-#include <cassert>
+#include "common.hpp"
+
+template <Tile_Kind kind>
+struct PropAnimated {
+    Grid_Point point;
+
+    constexpr bool operator==(const PropAnimated &other) const
+    {
+        return this->point == other.point;
+    }
+
+    const Animation &get_animation();
+    void draw();
+};
+
+struct Button {
+    Grid_Point point;
+    Grid_Point corresponding_door_point;
+    bool pressed;
+};
+
+enum class Level_Flag : uint8_t {
+    Has_Player = 1 << 0,
+    Has_Portal = 1 << 1,
+};
 
 struct Level {
+    int id = 0;
     int width = 0;
     int height = 0;
     uint8_t *data = nullptr;
     uint8_t *initial_data = nullptr;
     Grid_Point initial_player_position = {};
+    Fixed_Array<Button, 8> buttons = {};
+    Fixed_Array<PropAnimated<Tile_Kind::Door>, 8> doors = {};
+    PropAnimated<Tile_Kind::Portal> portal = {};
+    uint8_t flags = 0;
 
     ~Level();
 
-    bool in_bounds(int row, int col) const
+    constexpr bool in_bounds(int row, int col) const
     {
         return (0 <= col && col < width) && (0 <= row && row < height);
     }
 
-    bool in_bounds(Grid_Point point) const
+    constexpr bool in_bounds(Grid_Point point) const
     {
-        return (0 <= point.col && point.col < width) && (0 <= point.row && point.row < height);
+        return in_bounds(point.row, point.col);
     }
 
-    Tile_Kind at(int row, int col);
-    void set(int row, int col, Tile_Kind kind);
+    constexpr bool has_flag(Level_Flag flag) const
+    {
+        return (flags & (uint8_t)flag) == (uint8_t)flag;
+    }
 
-    void load(const char *identifier);
+    Tile_Kind at(int row, int col) const;
+    Tile_Kind at(Grid_Point point) const;
+    void set(Grid_Point point, Tile_Kind kind);
+    void set_initial(Grid_Point point, Tile_Kind kind);
+    Button *find_button(Grid_Point point);
+    void remove_door_at(Grid_Point point);
+
+    void load(const char *level_name);
     void draw();
 };

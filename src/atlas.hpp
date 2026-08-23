@@ -57,5 +57,6 @@ struct Grid_Point {
 };
 
 void draw_sprite(int atlas_index, float x, float y);
-void draw_tile(Tile_Kind kind, int row, int col);
+void draw_sprite(int atlas_index, Grid_Point point);
+void draw_tile(Tile_Kind kind, int row, int col, bool hide_interactables = false);
 
