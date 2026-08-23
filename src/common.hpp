@@ -13,7 +13,6 @@
 static_assert(LEVEL_TILE_COLS > 0);
 static_assert(LEVEL_TILE_ROWS > 0);
 
-#define GAME_SCALE 2
 #define SCREEN_W (TILE_W * LEVEL_TILE_COLS)
 #define SCREEN_H (TILE_H * LEVEL_TILE_ROWS)
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <raylib.h>
 #include "animation.hpp"
 #include "common.hpp"
@@ -9,19 +10,25 @@
 
 Game_State game = {};
 
-static void draw_grid()
+static void draw_grid(float game_scale)
 {
     const Color color = {255, 255, 255, 20};
 
-    const int tile_h = GetScreenHeight() / LEVEL_TILE_ROWS;
+    const float window_w = GetScreenWidth();
+    const float window_h = GetScreenHeight();
+
+    const float offset_x = (window_w - SCREEN_W * game_scale) * 0.5f;
+    const float offset_y = (window_h - SCREEN_H * game_scale) * 0.5f;
+
+    const float tile_h = (SCREEN_H * game_scale) / LEVEL_TILE_ROWS;
     for (int row = 0; row < LEVEL_TILE_ROWS; row++) {
-        int y = row * tile_h;
-        DrawLine(0, y, GetScreenWidth(), y, color);
+        const float y = offset_y + row * tile_h;
+        DrawLineV({offset_x, y}, {offset_x + SCREEN_W * game_scale, y}, color);
     }
-    const int tile_w = GetScreenWidth() / LEVEL_TILE_COLS;
+    const float tile_w = (SCREEN_W * game_scale) / LEVEL_TILE_COLS;
     for (int col = 0; col < LEVEL_TILE_COLS; col++) {
-        int x = col * tile_w;
-        DrawLine(x, 0, x, GetScreenHeight(), color);
+        const float x = offset_x + col * tile_w;
+        DrawLineV({x, offset_y}, {x, offset_y + SCREEN_H * game_scale}, color);
     }
 }
 
@@ -60,18 +67,25 @@ void game_update()
         game.player.draw();
     EndTextureMode();
 
+    const float game_scale = std::min((float)GetScreenWidth()/SCREEN_W, (float)GetScreenHeight()/SCREEN_H);
     BeginDrawing();
         ClearBackground(BLACK);
         Rectangle screen_source = {0, 0, (float)SCREEN_W, -(float)SCREEN_H};
-        Rectangle screen_dest = {0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()};
+        Rectangle screen_dest = {
+            (GetScreenWidth() - SCREEN_W * game_scale) * 0.5f,
+            (GetScreenHeight() - SCREEN_H * game_scale) * 0.5f,
+            SCREEN_W * game_scale,
+            SCREEN_H * game_scale,
+        };
         DrawTexturePro(game.renderTexture.texture, screen_source, screen_dest, {0, 0}, 0, WHITE);
-        draw_grid();
+        draw_grid(game_scale);
     EndDrawing();
 }
 
 int main()
 {
-    InitWindow(SCREEN_W * GAME_SCALE, SCREEN_H * GAME_SCALE, "Sokonway");
+    constexpr int initial_scale = 2;
+    InitWindow(SCREEN_W * initial_scale, SCREEN_H * initial_scale, "Sokonway");
     game_init();
 
 #if defined(PLATFORM_WEB)
