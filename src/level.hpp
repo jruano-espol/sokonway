@@ -26,6 +26,7 @@ struct Button {
 enum class Level_Flag : uint8_t {
     Has_Player = 1 << 0,
     Has_Portal = 1 << 1,
+    Running_Conways_Game_Of_Life = 1 << 2,
 };
 
 struct Level {
@@ -38,6 +39,8 @@ struct Level {
     uint8_t *initial_data = nullptr;
     uint8_t *tiles = nullptr;
     uint8_t *cells = nullptr;
+    size_t generation = 0;
+    size_t simulation_timer = 0;
     int id = 0;
     int width = 0;
     int height = 0;
@@ -60,14 +63,18 @@ struct Level {
 
     Tile_Kind at(int row, int col) const;
     Tile_Kind at(Grid_Point point) const;
-    bool has_cell_at(Grid_Point point) const;
     void set(Grid_Point point, Tile_Kind kind);
-    void set_cell(Grid_Point point, bool fill);
     void set_initial(Grid_Point point, Tile_Kind kind);
+
+    bool has_alive_cell_at(Grid_Point point) const;
+    void set_cell(Grid_Point point, bool alive);
+    uint8_t get_cell_alive_neighbor_count(Grid_Point point);
+
     Button *find_button(Grid_Point point);
     void remove_door_at(Grid_Point point);
 
     void load(const char *level_name);
     void reload();
+    void update();
     void draw();
 };

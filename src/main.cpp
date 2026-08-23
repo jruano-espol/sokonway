@@ -52,15 +52,18 @@ void game_update()
 {
     g_key_repeat_timer++;
 
+    Level &current_level = game.levels[game.current_level];
+
     game.animation_player.update();
     game.animation_portal.update();
     game.animation_door.update();
 
+    current_level.update();
     game.player.update();
 
     BeginTextureMode(game.renderTexture);
         ClearBackground(PICO8_DARKGREY);
-        game.levels[0].draw();
+        current_level.draw();
         game.player.draw();
     EndTextureMode();
 
@@ -78,6 +81,7 @@ void game_update()
         Rectangle screen_dest = {game_offset.x, game_offset.y, game_screen_w, game_screen_h};
         DrawTexturePro(game.renderTexture.texture, screen_source, screen_dest, {0, 0}, 0, WHITE);
         draw_grid(game_scale, game_offset, game_screen_w, game_screen_h);
+        DrawText(TextFormat("generation: %zu", current_level.generation), game_offset.x + 3, game_offset.y + 3, 10, WHITE);
     EndDrawing();
 }
 

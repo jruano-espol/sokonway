@@ -1,6 +1,7 @@
 #include "level.hpp"
 #include "atlas.hpp"
 #include "game_state.hpp"
+#include "raylib.h"
 
 #include <sstream>
 #include <string>
@@ -69,25 +70,11 @@ Tile_Kind Level::at(Grid_Point point) const
     return at(point.row, point.col);
 }
 
-bool Level::has_cell_at(Grid_Point point) const
-{
-    assert(in_bounds(point));
-    uint8_t value = cells[point.row * width + point.col];
-    return Tile_Kind{value} == Tile_Kind::Cell;
-}
-
 void Level::set(Grid_Point point, Tile_Kind kind)
 {
     assert(in_bounds(point));
     const uint8_t value = (uint8_t)kind;
     tiles[point.row * width + point.col] = value;
-}
-
-void Level::set_cell(Grid_Point point, bool fill)
-{
-    assert(in_bounds(point));
-    Tile_Kind kind = fill ? Tile_Kind::Cell : Tile_Kind::Air;
-    cells[point.row * width + point.col] = (uint8_t)kind;
 }
 
 void Level::set_initial(Grid_Point point, Tile_Kind kind)
@@ -121,6 +108,50 @@ void Level::set_initial(Grid_Point point, Tile_Kind kind)
         set(point, kind);
         break;
     }
+}
+
+bool Level::has_alive_cell_at(Grid_Point point) const
+{
+    assert(in_bounds(point));
+    uint8_t value = cells[point.row * width + point.col];
+    return Tile_Kind{value} == Tile_Kind::Cell;
+}
+
+void Level::set_cell(Grid_Point point, bool alive)
+{
+    assert(in_bounds(point));
+    Tile_Kind kind = alive ? Tile_Kind::Cell : Tile_Kind::Air;
+    cells[point.row * width + point.col] = (uint8_t)kind;
+
+    if (alive) {
+        Button *p_button = find_button(point);
+        if (p_button && !p_button->pressed) {
+            p_button->pressed = true;
+            remove_door_at(p_button->corresponding_door_point);
+        }
+    }
+}
+
+uint8_t Level::get_cell_alive_neighbor_count(Grid_Point point)
+{
+    Grid_Point offsets[] = {
+        {-1, -1},
+        {-1, 0},
+        {-1, 1},
+        {0, -1},
+        {0, 1},
+        {1, -1},
+        {1, 0},
+        {1, 1},
+    };
+    uint8_t count = 0;
+    for (Grid_Point offset : offsets) {
+        Grid_Point neighbor = point + offset;
+        if (in_bounds(neighbor) && has_alive_cell_at(neighbor)) {
+            count++;
+        }
+    }
+    return count;
 }
 
 Button *Level::find_button(Grid_Point point)
@@ -191,6 +222,36 @@ void Level::reload()
     }
 }
 
+void Level::update()
+{
+    simulation_timer++;
+
+    const bool simulating = has_flag(Level_Flag::Running_Conways_Game_Of_Life);
+
+    if (simulating && simulation_timer % 60 == 0) {
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                const Grid_Point point = {row, col};
+                const uint8_t alive_neighbors = get_cell_alive_neighbor_count(point);
+                if (has_alive_cell_at(point)) {
+                    if (alive_neighbors == 2 || alive_neighbors == 3) {
+                        set_cell(point, true);
+                    } else {
+                        set_cell(point, false);
+                    }
+                } else {
+                    if (alive_neighbors == 3) {
+                        set_cell(point, true);
+                    } else {
+                        set_cell(point, false);
+                    }
+                }
+            }
+        }
+        generation++;
+    }
+}
+
 void Level::draw()
 {
     assert(tiles);
@@ -213,8 +274,8 @@ void Level::draw()
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             Grid_Point point = {row, col};
-            if (has_cell_at(point)) {
-                draw_sprite(atlas_index_from(Tile_Kind::Cell), point, 0.9f);
+            if (has_alive_cell_at(point)) {
+                draw_sprite(atlas_index_from(Tile_Kind::Cell), point, 0.7f);
             }
         }
     }

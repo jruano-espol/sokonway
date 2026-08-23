@@ -1,6 +1,7 @@
 #include "player.hpp"
 #include "common.hpp"
 #include "game_state.hpp"
+#include "level.hpp"
 #include "raylib.h"
 
 #define is_left_pressed() (IsKeyPressedOrRepeat(KEY_A) || IsKeyPressedOrRepeat(KEY_LEFT))
@@ -16,6 +17,9 @@ void Player::update()
         level.reload();
         grid_position = level.initial_player_position;
         return;
+    }
+    if (IsKeyPressed(KEY_SPACE)) {
+        level.flags |= (uint8_t)Level_Flag::Running_Conways_Game_Of_Life;
     }
 
     Grid_Point direction = {0, 0};
@@ -48,9 +52,9 @@ void Player::update()
             }
         }
 
-        if (level.has_cell_at(new_position)) {
+        if (level.has_alive_cell_at(new_position)) {
             const Grid_Point after_target = new_position + direction;
-            if (level.has_cell_at(after_target)) {
+            if (level.has_alive_cell_at(after_target)) {
                 can_move_there = false;
             } else {
                 level.set_cell(new_position, false);
