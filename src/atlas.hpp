@@ -8,6 +8,7 @@ enum class Tile_Kind : uint8_t {
     Player,
     Cell,
     Wall,
+    Lever,
     Button,
     Portal,
     Door,
@@ -20,6 +21,7 @@ constexpr int atlas_index_from(Tile_Kind kind)
     case Tile_Kind::Player: return 0;
     case Tile_Kind::Cell: return 2;
     case Tile_Kind::Wall: return 3;
+    case Tile_Kind::Lever: return 4;
     case Tile_Kind::Button: return 6;
     case Tile_Kind::Portal: return 8;
     case Tile_Kind::Door: return 12;

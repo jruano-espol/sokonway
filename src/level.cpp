@@ -89,6 +89,11 @@ void Level::set_initial(Grid_Point point, Tile_Kind kind)
         doors.append({ .point = point });
         set(point, kind);
         break;
+    case Tile_Kind::Lever:
+        assert(!has_flag(Level_Flag::Has_Lever));
+        flags |= (uint8_t)Level_Flag::Has_Lever;
+        lever_position = point;
+        break;
     case Tile_Kind::Button:
         buttons.append({
             .point = point,
@@ -267,6 +272,13 @@ void Level::draw()
             atlas_index++;
         }
         draw_sprite(atlas_index, buttons[i].point);
+    }
+    {
+        int atlas_index = atlas_index_from(Tile_Kind::Lever);
+        if (has_flag(Level_Flag::Running_Conways_Game_Of_Life)) {
+            atlas_index++;
+        }
+        draw_sprite(atlas_index, lever_position);
     }
     for (size_t i = 0; i < doors.count; i++) {
         doors[i].draw(0.9f);

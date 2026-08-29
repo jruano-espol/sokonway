@@ -18,8 +18,8 @@ void Player::update()
         grid_position = level.initial_player_position;
         return;
     }
-    if (IsKeyPressed(KEY_SPACE)) {
-        level.flags |= (uint8_t)Level_Flag::Running_Conways_Game_Of_Life;
+    if (level.lever_position == grid_position && IsKeyPressed(KEY_SPACE)) {
+        level.toggle_flag(Level_Flag::Running_Conways_Game_Of_Life);
     }
 
     Grid_Point direction = {0, 0};

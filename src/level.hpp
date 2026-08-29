@@ -26,7 +26,8 @@ struct Button {
 enum class Level_Flag : uint8_t {
     Has_Player = 1 << 0,
     Has_Portal = 1 << 1,
-    Running_Conways_Game_Of_Life = 1 << 2,
+    Has_Lever  = 1 << 2,
+    Running_Conways_Game_Of_Life = 1 << 3,
 };
 
 struct Level {
@@ -34,6 +35,7 @@ struct Level {
     Fixed_Array<PropAnimated<Tile_Kind::Door>, 8> doors = {};
     Bump_Allocator_Fixed allocator = {};
     Grid_Point initial_player_position = {};
+    Grid_Point lever_position = {};
     PropAnimated<Tile_Kind::Portal> portal = {};
 
     uint8_t *initial_data = nullptr;
@@ -59,6 +61,15 @@ struct Level {
     constexpr bool has_flag(Level_Flag flag) const
     {
         return (flags & (uint8_t)flag) == (uint8_t)flag;
+    }
+
+    constexpr void toggle_flag(Level_Flag flag)
+    {
+        if (has_flag(flag)) {
+            flags ^= (uint8_t)flag;
+        } else {
+            flags |= (uint8_t)flag;
+        }
     }
 
     Tile_Kind at(int row, int col) const;
