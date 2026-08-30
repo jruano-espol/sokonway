@@ -24,9 +24,10 @@ static Grid_Point get_corresponding_door_point(int level_id, Grid_Point point)
 {
     switch (level_id) {
     case 0:
-        if (point == Grid_Point{3, 14}) {
+        if (point == Grid_Point{17, 20}) {
             return Grid_Point{7, 10};
         }
+        assert(!"level 0's buttons have changed");
     default:
         break;
     }
@@ -115,10 +116,17 @@ void Level::set_initial(Grid_Point point, Tile_Kind kind)
     }
 }
 
+bool Level::has_alive_cell_on_last_generation_at(Grid_Point point) const
+{
+    assert(in_bounds(point));
+    const uint8_t value = cells_last_generation[point.row * width + point.col];
+    return Tile_Kind{value} == Tile_Kind::Cell;
+}
+
 bool Level::has_alive_cell_at(Grid_Point point) const
 {
     assert(in_bounds(point));
-    uint8_t value = cells[point.row * width + point.col];
+    const uint8_t value = cells[point.row * width + point.col];
     return Tile_Kind{value} == Tile_Kind::Cell;
 }
 
@@ -137,7 +145,7 @@ void Level::set_cell(Grid_Point point, bool alive)
     }
 }
 
-uint8_t Level::get_cell_alive_neighbor_count(Grid_Point point)
+uint8_t Level::get_cell_last_generation_alive_neighbor_count(Grid_Point point)
 {
     Grid_Point offsets[] = {
         {-1, -1},
@@ -152,7 +160,7 @@ uint8_t Level::get_cell_alive_neighbor_count(Grid_Point point)
     uint8_t count = 0;
     for (Grid_Point offset : offsets) {
         Grid_Point neighbor = point + offset;
-        if (in_bounds(neighbor) && has_alive_cell_at(neighbor)) {
+        if (in_bounds(neighbor) && has_alive_cell_on_last_generation_at(neighbor)) {
             count++;
         }
     }
@@ -187,10 +195,11 @@ void Level::load(const char *level_name)
     this->height = lines.size();
     assert(width > 0 && height > 0);
 
-    this->allocator.init(3 * width * height);
+    this->allocator.init(4 * width * height);
     this->initial_data = (uint8_t*)allocator.push(width * height);
     this->tiles = (uint8_t*)allocator.push(width * height);
     this->cells = (uint8_t*)allocator.push(width * height);
+    this->cells_last_generation = (uint8_t*)allocator.push(width * height);
 
     for (size_t line_index = 0; line_index < lines.size(); line_index++) {
         assert(lines[line_index].size() == width);
@@ -204,16 +213,18 @@ void Level::load(const char *level_name)
             this->set_initial(point, Tile_Kind{number});
         }
     }
+    memcpy(cells_last_generation, cells, width * height);
+
     assert(has_flag(Level_Flag::Has_Player));
     assert(has_flag(Level_Flag::Has_Portal));
 }
-
 
 void Level::reload()
 {
     memset(tiles, 0, width * height);
     memset(cells, 0, width * height);
     flags = 0;
+    generation = 0;
 
     buttons.clear();
     doors.clear();
@@ -225,6 +236,7 @@ void Level::reload()
             this->set_initial({row, col}, Tile_Kind{number});
         }
     }
+    memcpy(cells_last_generation, cells, width * height);
 }
 
 void Level::update()
@@ -233,26 +245,19 @@ void Level::update()
 
     const bool simulating = has_flag(Level_Flag::Running_Conways_Game_Of_Life);
 
-    if (simulating && simulation_timer % 60 == 0) {
+    if (simulating && simulation_timer % 10 == 0) {
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
                 const Grid_Point point = {row, col};
-                const uint8_t alive_neighbors = get_cell_alive_neighbor_count(point);
-                if (has_alive_cell_at(point)) {
-                    if (alive_neighbors == 2 || alive_neighbors == 3) {
-                        set_cell(point, true);
-                    } else {
-                        set_cell(point, false);
-                    }
+                const uint8_t alive_neighbors = get_cell_last_generation_alive_neighbor_count(point);
+                if (has_alive_cell_on_last_generation_at(point)) {
+                    set_cell(point, alive_neighbors == 2 || alive_neighbors == 3);
                 } else {
-                    if (alive_neighbors == 3) {
-                        set_cell(point, true);
-                    } else {
-                        set_cell(point, false);
-                    }
+                    set_cell(point, alive_neighbors == 3);
                 }
             }
         }
+        memcpy(cells_last_generation, cells, width * height);
         generation++;
     }
 }

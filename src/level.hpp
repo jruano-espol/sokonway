@@ -41,6 +41,7 @@ struct Level {
     uint8_t *initial_data = nullptr;
     uint8_t *tiles = nullptr;
     uint8_t *cells = nullptr;
+    uint8_t *cells_last_generation = nullptr;
     size_t generation = 0;
     size_t simulation_timer = 0;
     int id = 0;
@@ -77,9 +78,10 @@ struct Level {
     void set(Grid_Point point, Tile_Kind kind);
     void set_initial(Grid_Point point, Tile_Kind kind);
 
+    bool has_alive_cell_on_last_generation_at(Grid_Point point) const;
     bool has_alive_cell_at(Grid_Point point) const;
     void set_cell(Grid_Point point, bool alive);
-    uint8_t get_cell_alive_neighbor_count(Grid_Point point);
+    uint8_t get_cell_last_generation_alive_neighbor_count(Grid_Point point);
 
     Button *find_button(Grid_Point point);
     void remove_door_at(Grid_Point point);

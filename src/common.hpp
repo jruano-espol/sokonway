@@ -59,6 +59,7 @@ struct Fixed_Array {
         for (size_t i = 0; i < count; i++) {
             if (data[i] == element) {
                 data[i] = data[count - 1];
+                count--;
                 break;
             }
         }

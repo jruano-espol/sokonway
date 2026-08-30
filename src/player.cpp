@@ -59,6 +59,7 @@ void Player::update()
             } else {
                 level.set_cell(new_position, false);
                 level.set_cell(after_target, true);
+                memcpy(level.cells_last_generation, level.cells, level.width * level.height);
             }
         }
 
