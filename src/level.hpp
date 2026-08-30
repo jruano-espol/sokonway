@@ -27,17 +27,16 @@ enum class Level_Flag : uint8_t {
     Is_Loaded = BIT(0),
     Has_Player = BIT(1),
     Has_Portal = BIT(2),
-    Has_Lever  = BIT(3),
-    Running_Conways_Game_Of_Life = BIT(4),
-    Simulation_Speed_Fast = BIT(5),
+    Running_Conways_Game_Of_Life = BIT(3),
+    Simulation_Speed_Fast = BIT(4),
 };
 
 struct Level {
     Fixed_Array<Button, 8> buttons = {};
     Fixed_Array<PropAnimated<Tile_Kind::Door>, 8> doors = {};
+    Fixed_Array<Grid_Point, 2> lever_positions = {};
     Bump_Allocator_Fixed allocator = {};
     Grid_Point initial_player_position = {};
-    Grid_Point lever_position = {};
     PropAnimated<Tile_Kind::Portal> portal = {};
 
     uint8_t *initial_data = nullptr;

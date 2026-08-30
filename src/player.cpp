@@ -21,8 +21,11 @@ void Player::update()
     if (IsKeyPressed(KEY_F)) {
         level.toggle_flag(Level_Flag::Simulation_Speed_Fast);
     }
-    if (level.lever_position == grid_position && IsKeyPressed(KEY_SPACE)) {
-        level.toggle_flag(Level_Flag::Running_Conways_Game_Of_Life);
+    if (IsKeyPressed(KEY_SPACE)) {
+        int index = level.lever_positions.linear_search_index_of(grid_position);
+        if (index >= 0) {
+            level.toggle_flag(Level_Flag::Running_Conways_Game_Of_Life);
+        }
     }
 
     Grid_Point direction = {0, 0};

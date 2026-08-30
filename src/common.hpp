@@ -61,6 +61,16 @@ struct Fixed_Array {
         data[count++] = element;
     }
 
+    constexpr int linear_search_index_of(const T &element)
+    {
+        for (size_t i = 0; i < count; i++) {
+            if (data[i] == element) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     constexpr void unordered_remove(const T &element)
     {
         for (size_t i = 0; i < count; i++) {

@@ -47,6 +47,14 @@ static Grid_Point get_corresponding_door_point(int level_id, Grid_Point point)
             return {19, 32};
         }
         assert(!"level 3's buttons have changed");
+    case 4:
+        if (point == Grid_Point{1, 37}) {
+            return {18, 32};
+        }
+        if (point == Grid_Point{10, 34}) {
+            return {7, 19};
+        }
+        assert(!"level 4's buttons have changed");
     default:
         break;
     }
@@ -114,9 +122,7 @@ void Level::set_initial(Grid_Point point, Tile_Kind kind)
         set(point, kind);
         break;
     case Tile_Kind::Lever:
-        assert(!has_flag(Level_Flag::Has_Lever));
-        flags |= (uint8_t)Level_Flag::Has_Lever;
-        lever_position = point;
+        lever_positions.append(point);
         break;
     case Tile_Kind::Button:
         buttons.append({
@@ -260,6 +266,7 @@ void Level::reload()
     flags = 0;
     generation = 0;
 
+    lever_positions.clear();
     buttons.clear();
     doors.clear();
     portal = {};
@@ -315,12 +322,12 @@ void Level::draw()
         }
         draw_sprite(atlas_index, buttons[i].point);
     }
-    {
+    for (size_t i = 0; i < lever_positions.count; i++) {
         int atlas_index = atlas_index_from(Tile_Kind::Lever);
         if (has_flag(Level_Flag::Running_Conways_Game_Of_Life)) {
             atlas_index++;
         }
-        draw_sprite(atlas_index, lever_position);
+        draw_sprite(atlas_index, lever_positions[i]);
     }
     for (size_t i = 0; i < doors.count; i++) {
         doors[i].draw(0.9f);

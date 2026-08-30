@@ -59,6 +59,7 @@ void game_init()
     game.levels[1].load("1");
     game.levels[2].load("2");
     game.levels[3].load("3");
+    game.levels[4].load("4");
     game.current_level = 0;
 
     game.animation_player = Animation::from(Tile_Kind::Player, true, 20);
