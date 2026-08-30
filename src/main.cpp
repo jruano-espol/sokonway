@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <raylib.h>
+#include <raymath.h>
 #include "animation.hpp"
 #include "common.hpp"
 #include "game_state.hpp"
@@ -11,7 +12,7 @@
 Game_State game = {};
 int g_key_repeat_timer = 0;
 
-static void draw_grid(float game_scale, Vector2 offset, float game_screen_w, float game_screen_h)
+static void draw_grid(Vector2 offset, float game_screen_w, float game_screen_h)
 {
     const Color color = {255, 255, 255, 20};
 
@@ -27,6 +28,28 @@ static void draw_grid(float game_scale, Vector2 offset, float game_screen_w, flo
     }
 }
 
+static void draw_top_bar_ui(const Level &current_level, Vector2 game_offset, float game_screen_h)
+{
+    const float tile_h = game_screen_h / LEVEL_TILE_ROWS;
+
+    Font font = GetFontDefault();
+    constexpr float tile_percentage = 0.8f;
+    const float font_size = tile_h * tile_percentage;
+    const float spacing = 1.0f;
+    Vector2 pos = Vector2AddValue(game_offset, tile_h * (1.0f - tile_percentage));
+    const char *text = nullptr;
+
+    text = TextFormat("generation: %zu", current_level.generation);
+    DrawTextEx(font, text, pos, font_size, spacing, WHITE);
+    pos.x += font_size * spacing + MeasureTextEx(font, text, font_size, spacing).x;
+
+    if (current_level.has_flag(Level_Flag::Simulation_Speed_Fast)) {
+        text = "(Fast Simulation Speed)";
+        DrawTextEx(font, text, pos, font_size, spacing, SKYBLUE);
+        pos.x += font_size * spacing + MeasureTextEx(font, text, font_size, spacing).x;
+    }
+}
+
 void game_init()
 {
     game.textureAtlas = LoadTexture("assets/images/sokonway-texture-atlas.png");
@@ -34,6 +57,7 @@ void game_init()
 
     game.levels[0].load("0");
     game.levels[1].load("1");
+    game.levels[2].load("2");
     game.current_level = 0;
 
     game.animation_player = Animation::from(Tile_Kind::Player, true, 20);
@@ -81,8 +105,8 @@ void game_update()
         Rectangle screen_source = {0, 0, (float)SCREEN_W, -(float)SCREEN_H};
         Rectangle screen_dest = {game_offset.x, game_offset.y, game_screen_w, game_screen_h};
         DrawTexturePro(game.renderTexture.texture, screen_source, screen_dest, {0, 0}, 0, WHITE);
-        draw_grid(game_scale, game_offset, game_screen_w, game_screen_h);
-        DrawText(TextFormat("generation: %zu", current_level.generation), game_offset.x + 3, game_offset.y + 3, 10, WHITE);
+        draw_grid(game_offset, game_screen_w, game_screen_h);
+        draw_top_bar_ui(current_level, game_offset, game_screen_h);
     EndDrawing();
 }
 

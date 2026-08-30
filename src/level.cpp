@@ -34,6 +34,11 @@ static Grid_Point get_corresponding_door_point(int level_id, Grid_Point point)
             return Grid_Point{3, 36};
         }
         assert(!"level 1's buttons have changed");
+    case 2:
+        if (point == Grid_Point{3, 33}) {
+            return Grid_Point{14, 19};
+        }
+        assert(!"level 2's buttons have changed");
     default:
         break;
     }
@@ -265,8 +270,11 @@ void Level::update()
     simulation_timer++;
 
     const bool simulating = has_flag(Level_Flag::Running_Conways_Game_Of_Life);
+    const bool timed_out = has_flag(Level_Flag::Simulation_Speed_Fast)
+        ? true
+        : simulation_timer % 10 == 0;
 
-    if (simulating && simulation_timer % 10 == 0) {
+    if (simulating && timed_out) {
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
                 const Grid_Point point = {row, col};

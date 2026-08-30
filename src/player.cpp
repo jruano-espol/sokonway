@@ -18,6 +18,9 @@ void Player::update()
         grid_position = level.initial_player_position;
         return;
     }
+    if (IsKeyPressed(KEY_F)) {
+        level.toggle_flag(Level_Flag::Simulation_Speed_Fast);
+    }
     if (level.lever_position == grid_position && IsKeyPressed(KEY_SPACE)) {
         level.toggle_flag(Level_Flag::Running_Conways_Game_Of_Life);
     }

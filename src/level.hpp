@@ -29,6 +29,7 @@ enum class Level_Flag : uint8_t {
     Has_Portal = BIT(2),
     Has_Lever  = BIT(3),
     Running_Conways_Game_Of_Life = BIT(4),
+    Simulation_Speed_Fast = BIT(5),
 };
 
 struct Level {
