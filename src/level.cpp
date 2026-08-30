@@ -26,19 +26,27 @@ static Grid_Point get_corresponding_door_point(int level_id, Grid_Point point)
     switch (level_id) {
     case 0:
         if (point == Grid_Point{17, 20}) {
-            return Grid_Point{7, 10};
+            return {7, 10};
         }
         assert(!"level 0's buttons have changed");
     case 1:
         if (point == Grid_Point{4, 5}) {
-            return Grid_Point{3, 36};
+            return {3, 36};
         }
         assert(!"level 1's buttons have changed");
     case 2:
         if (point == Grid_Point{3, 33}) {
-            return Grid_Point{14, 19};
+            return {14, 19};
         }
         assert(!"level 2's buttons have changed");
+    case 3:
+        if (point == Grid_Point{5, 22}) {
+            return {9, 9};
+        }
+        if (point == Grid_Point{20, 13}) {
+            return {19, 32};
+        }
+        assert(!"level 3's buttons have changed");
     default:
         break;
     }

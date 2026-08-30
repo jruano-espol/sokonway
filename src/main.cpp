@@ -44,7 +44,7 @@ static void draw_top_bar_ui(const Level &current_level, Vector2 game_offset, flo
     pos.x += font_size * spacing + MeasureTextEx(font, text, font_size, spacing).x;
 
     if (current_level.has_flag(Level_Flag::Simulation_Speed_Fast)) {
-        text = "(Fast Simulation Speed)";
+        text = "(fast)";
         DrawTextEx(font, text, pos, font_size, spacing, SKYBLUE);
         pos.x += font_size * spacing + MeasureTextEx(font, text, font_size, spacing).x;
     }
@@ -58,6 +58,7 @@ void game_init()
     game.levels[0].load("0");
     game.levels[1].load("1");
     game.levels[2].load("2");
+    game.levels[3].load("3");
     game.current_level = 0;
 
     game.animation_player = Animation::from(Tile_Kind::Player, true, 20);
