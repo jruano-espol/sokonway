@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdio>
 #include <raylib.h>
 #include <raymath.h>
 #include "animation.hpp"
@@ -55,14 +56,17 @@ void game_init()
     game.textureAtlas = LoadTexture("assets/images/sokonway-texture-atlas.png");
     game.renderTexture = LoadRenderTexture(SCREEN_W, SCREEN_H);
 
-    game.levels[0].load("0");
-    game.levels[1].load("1");
-    game.levels[2].load("2");
-    game.levels[3].load("3");
-    game.levels[4].load("4");
-    game.levels[5].load("5");
-    game.levels[6].load("6");
+    constexpr int last_level_index = 9;
+    for (int i = 0; i <= last_level_index; i++) {
+        char level_name[3];
+        snprintf(level_name, sizeof(level_name), "%d",i);
+        game.levels[i].load(level_name);
+    }
+#if 0
+    game.current_level = last_level_index;
+#else
     game.current_level = 0;
+#endif
 
     game.animation_player = Animation::from(Tile_Kind::Player, true, 20);
     game.animation_portal = Animation::from(Tile_Kind::Portal, true, 15);
