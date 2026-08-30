@@ -33,6 +33,7 @@ void game_init()
     game.renderTexture = LoadRenderTexture(SCREEN_W, SCREEN_H);
 
     game.levels[0].load("0");
+    game.levels[1].load("1");
     game.current_level = 0;
 
     game.animation_player = Animation::from(Tile_Kind::Player, true, 20);

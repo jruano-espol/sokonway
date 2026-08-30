@@ -21,7 +21,7 @@ static_assert(LEVEL_TILE_ROWS > 0);
 extern int g_key_repeat_timer;
 #define IsKeyPressedOrRepeat(key)\
     (IsKeyPressed(key) ? (g_key_repeat_timer = 1) : 0,\
-     IsKeyPressed(key) || (IsKeyDown(key) && g_key_repeat_timer % 10 == 0))
+     IsKeyPressed(key) || (IsKeyDown(key) && g_key_repeat_timer % 7 == 0))
 
 #define PICO8_BLACK Color{0, 0, 0, 255}
 #define PICO8_DARKBLUE Color{29, 43, 83, 255}
@@ -39,6 +39,13 @@ extern int g_key_repeat_timer;
 #define PICO8_LAVENDER Color{131, 118, 156, 255}
 #define PICO8_PINK Color{255, 119, 168, 255}
 #define PICO8_LIGHTPEACH Color{255, 204, 170, 255}
+
+#define BIT(n) (1 << n)
+
+constexpr int floor_mod(int a, int b)
+{
+    return ((a % b) + b) % b;
+}
 
 template <typename T, size_t N>
 struct Fixed_Array {

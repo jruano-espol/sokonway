@@ -4,10 +4,12 @@
 #include "player.hpp"
 #include "animation.hpp"
 
+#define LEVEL_COUNT 10
+
 struct Game_State {
     RenderTexture2D renderTexture;
     Texture2D textureAtlas;
-    Level levels[10];
+    Level levels[LEVEL_COUNT];
     Animation animation_player;
     Animation animation_portal;
     Animation animation_door;

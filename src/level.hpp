@@ -24,10 +24,11 @@ struct Button {
 };
 
 enum class Level_Flag : uint8_t {
-    Has_Player = 1 << 0,
-    Has_Portal = 1 << 1,
-    Has_Lever  = 1 << 2,
-    Running_Conways_Game_Of_Life = 1 << 3,
+    Is_Loaded = BIT(0),
+    Has_Player = BIT(1),
+    Has_Portal = BIT(2),
+    Has_Lever  = BIT(3),
+    Running_Conways_Game_Of_Life = BIT(4),
 };
 
 struct Level {

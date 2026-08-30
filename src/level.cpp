@@ -1,5 +1,6 @@
 #include "level.hpp"
 #include "atlas.hpp"
+#include "common.hpp"
 #include "game_state.hpp"
 #include "raylib.h"
 
@@ -28,6 +29,11 @@ static Grid_Point get_corresponding_door_point(int level_id, Grid_Point point)
             return Grid_Point{7, 10};
         }
         assert(!"level 0's buttons have changed");
+    case 1:
+        if (point == Grid_Point{4, 5}) {
+            return Grid_Point{3, 36};
+        }
+        assert(!"level 1's buttons have changed");
     default:
         break;
     }
@@ -61,7 +67,9 @@ void PropAnimated<kind>::draw(float alpha)
 
 Tile_Kind Level::at(int row, int col) const
 {
-    assert(in_bounds(row, col));
+    if (!in_bounds(row, col)) {
+        return Tile_Kind::Air;
+    }
     uint8_t value = tiles[row * width + col];
     return Tile_Kind{value};
 }
@@ -73,7 +81,9 @@ Tile_Kind Level::at(Grid_Point point) const
 
 void Level::set(Grid_Point point, Tile_Kind kind)
 {
-    assert(in_bounds(point));
+    if (!in_bounds(point)) {
+        return;
+    }
     const uint8_t value = (uint8_t)kind;
     tiles[point.row * width + point.col] = value;
 }
@@ -106,6 +116,7 @@ void Level::set_initial(Grid_Point point, Tile_Kind kind)
         assert(!has_flag(Level_Flag::Has_Portal));
         flags |= (uint8_t)Level_Flag::Has_Portal;
         portal.point = point;
+        set(point, kind);
         break;
     case Tile_Kind::Cell:
         set_cell(point, true);
@@ -118,21 +129,29 @@ void Level::set_initial(Grid_Point point, Tile_Kind kind)
 
 bool Level::has_alive_cell_on_last_generation_at(Grid_Point point) const
 {
-    assert(in_bounds(point));
+    if (!in_bounds(point)) {
+        point.row = floor_mod(point.row, height);
+        point.col = floor_mod(point.col, width);
+    }
     const uint8_t value = cells_last_generation[point.row * width + point.col];
     return Tile_Kind{value} == Tile_Kind::Cell;
 }
 
 bool Level::has_alive_cell_at(Grid_Point point) const
 {
-    assert(in_bounds(point));
+    if (!in_bounds(point)) {
+        return false;
+    }
     const uint8_t value = cells[point.row * width + point.col];
     return Tile_Kind{value} == Tile_Kind::Cell;
 }
 
 void Level::set_cell(Grid_Point point, bool alive)
 {
-    assert(in_bounds(point));
+    if (!in_bounds(point)) {
+        point.row = floor_mod(point.row, height);
+        point.col = floor_mod(point.col, width);
+    }
     Tile_Kind kind = alive ? Tile_Kind::Cell : Tile_Kind::Air;
     cells[point.row * width + point.col] = (uint8_t)kind;
 
@@ -160,7 +179,7 @@ uint8_t Level::get_cell_last_generation_alive_neighbor_count(Grid_Point point)
     uint8_t count = 0;
     for (Grid_Point offset : offsets) {
         Grid_Point neighbor = point + offset;
-        if (in_bounds(neighbor) && has_alive_cell_on_last_generation_at(neighbor)) {
+        if (has_alive_cell_on_last_generation_at(neighbor)) {
             count++;
         }
     }
@@ -217,6 +236,8 @@ void Level::load(const char *level_name)
 
     assert(has_flag(Level_Flag::Has_Player));
     assert(has_flag(Level_Flag::Has_Portal));
+
+    flags |= (uint8_t)Level_Flag::Is_Loaded;
 }
 
 void Level::reload()

@@ -25,9 +25,11 @@ void Player::update()
     Grid_Point direction = {0, 0};
     if (is_left_pressed()) {
         direction.col -= 1;
+        facing_left = true;
     }
     if (is_right_pressed()) {
         direction.col += 1;
+        facing_left = false;
     }
     if (is_up_pressed()) {
         direction.row -= 1;
@@ -39,17 +41,33 @@ void Player::update()
     if (direction != Grid_Point{0, 0}) {
         const Grid_Point new_position = grid_position + direction;
         const Tile_Kind tile_there = level.at(new_position);
-
         bool can_move_there = level.in_bounds(new_position);
-        can_move_there &= tile_there != Tile_Kind::Wall;
-        can_move_there &= tile_there != Tile_Kind::Door;
 
-        if (level.at(new_position) == Tile_Kind::Button) {
+        switch (tile_there) {
+        case Tile_Kind::Portal: {
+            bool has_next_level =
+                game.current_level + 1 < LEVEL_COUNT &&
+                game.levels[game.current_level + 1].has_flag(Level_Flag::Is_Loaded);
+
+            if (has_next_level) {
+                game.current_level++;
+                grid_position = game.levels[game.current_level].initial_player_position;
+                return;
+            }
+        } break;
+        case Tile_Kind::Button: {
             Button *p_button = level.find_button(new_position);
             if (p_button && !p_button->pressed) {
                 p_button->pressed = true;
                 level.remove_door_at(p_button->corresponding_door_point);
             }
+        } break;
+        case Tile_Kind::Wall:
+        case Tile_Kind::Door:
+            can_move_there = false;
+            break;
+        default:
+            break;
         }
 
         if (level.has_alive_cell_at(new_position)) {
@@ -71,5 +89,5 @@ void Player::update()
 
 void Player::draw()
 {
-    game.animation_player.draw_tiled(grid_position);
+    game.animation_player.draw_tiled(grid_position, 1.0f, facing_left);
 }
