@@ -1,0 +1,77 @@
+name: Deploy web game to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install and activate emsdk
+        shell: bash
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git "$HOME/emsdk"
+          cd "$HOME/emsdk"
+          ./emsdk install latest
+          ./emsdk activate latest
+          echo "source $HOME/emsdk/emsdk_env.sh" >> "$GITHUB_ENV"
+
+      - name: Build web version
+        shell: bash
+        run: |
+          source "$HOME/emsdk/emsdk_env.sh"
+          chmod +x ./deploy_web.sh
+          ./deploy_web.sh
+
+      - name: Prepare files for GitHub Pages
+        shell: bash
+        run: |
+          set -e
+          BUILD_DIR="$GITHUB_WORKSPACE/web_build"
+          PUB_DIR="$GITHUB_WORKSPACE/site"
+
+          test -d "$BUILD_DIR"
+
+          mkdir -p "$PUB_DIR"
+          cp "$BUILD_DIR/sokonway.js" "$PUB_DIR/"
+          cp "$BUILD_DIR/sokonway.wasm" "$PUB_DIR/"
+          cp "$BUILD_DIR/sokonway.data" "$PUB_DIR/"
+          cp "$BUILD_DIR/sokonway.html" "$PUB_DIR/index.html"
+
+      - name: Publish to gh-pages branch
+        shell: bash
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages
+            git checkout -B gh-pages origin/gh-pages
+            git rm -rf . || true
+          else
+            git checkout --orphan gh-pages
+          fi
+
+          cp -r "$GITHUB_WORKSPACE/site"/. "$GITHUB_WORKSPACE/"
+          rm -rf "$GITHUB_WORKSPACE/site" "$GITHUB_WORKSPACE/web_build"
+
+          git add .
+          if git diff --cached --quiet; then
+            echo "Nothing to deploy"
+            exit 0
+          fi
+
+          git commit -m "Deploy web build"
+          git push origin HEAD:gh-pages
