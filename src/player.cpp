@@ -1,5 +1,6 @@
 #include "player.hpp"
 #include "common.hpp"
+#include "persistence.hpp"
 #include "game_state.hpp"
 #include "level.hpp"
 #include "raylib.h"
@@ -14,8 +15,11 @@ void Player::update()
     Level &level = game.levels[game.current_level];
 
     if (IsKeyPressed(KEY_R)) {
-        level.reload();
-        grid_position = level.initial_player_position;
+        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+            game.current_level = 0;
+        }
+        game.levels[game.current_level].reload();
+        grid_position = game.levels[game.current_level].initial_player_position;
         return;
     }
     if (IsKeyPressed(KEY_F)) {
@@ -57,7 +61,9 @@ void Player::update()
 
             if (has_next_level) {
                 game.current_level++;
+                game.levels[game.current_level].reload();
                 grid_position = game.levels[game.current_level].initial_player_position;
+                save_current_level_index(game.current_level);
                 return;
             }
         } break;

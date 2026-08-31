@@ -31,6 +31,7 @@ set(SOURCES
     "src/atlas.cpp"
     "src/level.cpp"
     "src/main.cpp"
+    "src/persistence.cpp"
     "src/player.cpp"
 )
 

@@ -301,6 +301,8 @@ void Level::reload()
         }
     }
     memcpy(cells_last_generation, cells, width * height);
+
+    flags |= (uint8_t)Level_Flag::Is_Loaded;
 }
 
 void Level::update()

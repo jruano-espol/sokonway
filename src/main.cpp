@@ -4,6 +4,7 @@
 #include <raymath.h>
 #include "animation.hpp"
 #include "common.hpp"
+#include "persistence.hpp"
 #include "game_state.hpp"
 
 #if defined(PLATFORM_WEB)
@@ -56,17 +57,12 @@ void game_init()
     game.textureAtlas = LoadTexture("assets/images/sokonway-texture-atlas.png");
     game.renderTexture = LoadRenderTexture(SCREEN_W, SCREEN_H);
 
-    constexpr int last_level_index = 9;
-    for (int i = 0; i <= last_level_index; i++) {
+    for (int i = 0; i < LEVEL_COUNT; i++) {
         char level_name[3];
         snprintf(level_name, sizeof(level_name), "%d",i);
         game.levels[i].load(level_name);
     }
-#if 0
-    game.current_level = last_level_index;
-#else
-    game.current_level = 0;
-#endif
+    game.current_level = load_current_level_index();
 
     game.animation_player = Animation::from(Tile_Kind::Player, true, 20);
     game.animation_portal = Animation::from(Tile_Kind::Portal, true, 15);
