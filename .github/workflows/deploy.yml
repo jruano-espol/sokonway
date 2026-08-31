@@ -48,6 +48,7 @@ jobs:
           cp "$BUILD_DIR/sokonway.js" "$PUB_DIR/"
           cp "$BUILD_DIR/sokonway.wasm" "$PUB_DIR/"
           cp "$BUILD_DIR/sokonway.data" "$PUB_DIR/"
+          cp "$GITHUB_WORKSPACE/index.html" "$PUB_DIR/"
 
       - name: Publish to gh-pages branch
         shell: bash
