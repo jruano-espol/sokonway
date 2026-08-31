@@ -25,7 +25,8 @@ jobs:
           cd "$HOME/emsdk"
           ./emsdk install latest
           ./emsdk activate latest
-          echo "source $HOME/emsdk/emsdk_env.sh" >> "$GITHUB_ENV"
+          echo "EMSDK_ENV=$HOME/emsdk/emsdk_env.sh" >> "$GITHUB_ENV"
+
 
       - name: Build web version
         shell: bash
