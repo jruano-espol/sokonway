@@ -1,0 +1,5 @@
+.cache/
+build/
+web_build/
+compile_commands.json
+game_progress.bin
